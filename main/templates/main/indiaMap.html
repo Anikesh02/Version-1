@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>India</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=MuseoModerno:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'css/indiaMap.css'  %}">
+  </head>
+  <body>
+    <div id="language">INDIA</div>
+    
+    <div id="info-desk" class="hidden">
+      <div class="info-desk-content">
+        <div class="info-header">
+          <h2><span id="state-name">Maharashtra</span><span id="capital">(Mumbai)</span></h2>
+          <img src="./static/assets/maharashtra_map.jpg" alt="India Map" class="state-image">
+        </div>
+        <div class="info-body">
+          <div class="artifacts-container">
+            <h3>Artifacts:</h3>
+            <ul class="artifacts-list">
+              <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo eaque molestias cumque repudiandae, libero cum unde sint voluptas fugit corrupti?</li>
+              <li>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Accusantium inventore nisi in libero dolor recusandae?</li>
+              <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad, quod ipsam laboriosam sunt culpa adipisci at blanditiis ullam asperiores iure.</li>
+              <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad, quod ipsam laboriosam sunt culpa adipisci at blanditiis ullam asperiores iure.</li>
+              <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad, quod ipsam laboriosam sunt culpa adipisci at blanditiis ullam asperiores iure.</li>
+              <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad, quod ipsam laboriosam sunt culpa adipisci at blanditiis ullam asperiores iure.</li>
+              <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad, quod ipsam laboriosam sunt culpa adipisci at blanditiis ullam asperiores iure.</li>
+              <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad, quod ipsam laboriosam sunt culpa adipisci at blanditiis ullam asperiores iure.</li>
+              <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad, quod ipsam laboriosam sunt culpa adipisci at blanditiis ullam asperiores iure.</li>
+              <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad, quod ipsam laboriosam sunt culpa adipisci at blanditiis ullam asperiores iure.</li>
+              <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad, quod ipsam laboriosam sunt culpa adipisci at blanditiis ullam asperiores iure.</li>
+              <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad, quod ipsam laboriosam sunt culpa adipisci at blanditiis ullam asperiores iure.</li>
+              <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad, quod ipsam laboriosam sunt culpa adipisci at blanditiis ullam asperiores iure.</li>
+              <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad, quod ipsam laboriosam sunt culpa adipisci at blanditiis ullam asperiores iure.</li>
+
+            </ul>
+          </div>
+        </div>
+        <div class="button-container">
+          <button id="go-back">Go Back</button>
+          <button id="go-museum">Go to Museum</button>
+        </div>
+      </div>
+    </div>
+    
+
+    <div id="timeline-container">
+      <div id="progress-wrapper">
+        <div id="progress-line"></div>
+      </div>
+      <ul id="timeline">
+        <li id="IN-JK" data-state="IN-JK">Jammu and Kashmir</li>
+        <li id="IN-RJ" data-state="IN-RJ">Rajasthan</li>
+        <li id="IN-GJ" data-state="IN-GJ">Gujarat</li>
+        <li id="IN-MP" data-state="IN-MP">Madhya Pardesh</li>
+        <li id="IN-CT" data-state="IN-CT">Chattisgarh</li>
+        <li id="IN-JH" data-state="IN-JH">Jharkhand</li>
+        <li id="IN-BR" data-state="IN-BR">Bihar</li>
+        <li id="IN-MH" data-state="IN-MH">Maharashtra</li>
+        <li id="IN-TG" data-state="IN-TG">Telangana</li>
+        <li id="IN-KA" data-state="IN-KA">Karnataka</li>
+        <li id="IN-TN" data-state="IN-TN">Tamil Nadu</li>
+        <li id="IN-KL" data-state="IN-KL">Kerala</li>
+      </ul>
+    </div>
+  </body>
+  <script src="{% static 'india.bundle.js' %}"></script>
+</html>

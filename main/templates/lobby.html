@@ -1,0 +1,58 @@
+{% load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eyantra Museum</title>
+    {% comment %} <link rel="stylesheet" href="./style.css"> {% endcomment %}
+     <link rel="stylesheet"  href="{% static 'lobby.css' %}">
+
+</head>
+<body>
+    <div class="background-menu">
+        <div id="menu">
+            <div id="content">
+                <h1>Virtual 3D MetaVerse</h1>
+                <div id="play_button">
+                    <p>Enter the Museum</p>
+                </div>
+            </div>
+        </div>
+    </div>
+      
+
+    <div id="modal">
+        <span id="modal-close">&times;</span>
+        <div id="modal-content">
+          <img id="modal-image" src="" alt="Image">
+          <div id="modal-info">
+            <h2>Image Information</h2>
+            <p>This is some information about the image.</p>
+          </div>
+        </div>
+        <div id="modal-buttons">
+          <button id="modal-back">Go Back</button>
+          <button id="modal-link">3D Model</button>
+        </div>
+      </div>
+  
+
+  <!-- Floor Selection Modal -->
+  <div id="floorSelectionModal" class="glassmorphism">
+    <span id="floorSelectionClose">&times;</span>
+    <div id="floorSelectionContent">
+        <div id="floorSelectionInfo">
+            <h2>Select Floor</h2>
+            <button id="floorSelectionButtons" onclick="setCameraHeight(10)">Ground Floor</button>
+            <button id="floorSelectionButtons" onclick="setCameraHeight(52)">First Floor</button>
+            <button id="floorSelectionButtons" onclick="setCameraHeight(84)">Second Floor</button>
+        </div>
+    </div>
+</div>
+      
+    {% comment %} <script src="./main.js" type="module"></script> {% endcomment %}
+    <script src="{% static 'lobby.bundle.js' %}"></script>
+
+</body>
+</html>
