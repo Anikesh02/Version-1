@@ -1,5 +1,4 @@
 // import '../styles/style.css';
-import * as dat from 'dat.gui';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three-stdlib';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -10,12 +9,12 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000); // Field of View, Aspect Ratio, Near and Far Clipping Plane
 scene.add(camera);
-camera.position.set(0, 9, 35);
+camera.position.set(0, 10, 35);
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x000000, 1);
+renderer.setClearColor(0xfffffff, 1);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
@@ -58,19 +57,19 @@ redTracker();
 // Floor function
 const createFloor = (color, yPos) => {
     const planeGeometry = new THREE.PlaneGeometry(100, 100, 10);
-    const planeMaterial = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
+    const planeMaterial = new THREE.MeshStandardMaterial({ color: color, side: THREE.DoubleSide });
     const floorPlane = new THREE.Mesh(planeGeometry, planeMaterial);
     floorPlane.rotation.x = 0.5 * Math.PI;
     floorPlane.position.y = yPos;
     scene.add(floorPlane);
 };
 // Creating floors with colors instead of textures
-createFloor(0x2f2e2e, 0);   // Ground Floor - Grey
-createFloor(0x2f2e2e, 40);    // Ground Floor Ceiling - Dark Grey
-createFloor(0x2f2e2e, 42);  // First Floor - Grey
-createFloor(0x2f2e2e, 75);    // First Floor Ceiling - Dark Grey
-createFloor(0x2f2e2e, 77);  // First Floor - Grey
-createFloor(0x2f2e2e, 110);    // First Floor Ceiling - Dark Grey
+createFloor(0x333333, 0);   // Ground Floor - Grey
+createFloor(0x333333, 40);    // Ground Floor Ceiling - Dark Grey
+createFloor(0x333333, 42);  // First Floor - Grey
+createFloor(0x333333, 75);    // First Floor Ceiling - Dark Grey
+createFloor(0x333333, 77);  // Second Floor - Grey
+createFloor(0x333333, 110);    // Second Floor Ceiling - Dark Grey
 
 // Model on the center of the Ground Floor
 const loadModel = (modelName, position, scale, rotation) => {
@@ -92,7 +91,9 @@ const loadModel = (modelName, position, scale, rotation) => {
 
 const models = [
     // Ground Floor
-    { modelName: 'CenterModel', position: [4, 6, 0], scale: [1, 1, 1], rotation: [0, 0, 0] },
+    { modelName: 'CenterModel', position: [4, 5, 0], scale: [1, 1, 1], rotation: [0, 0, 0] },
+    {modelName: 'table', position: [4, 41.5, 0], scale: [2, 2, 2], rotation: [0, 0 , 0] },
+    {modelName: 'antique_globe', position: [-18.5, 57.5, 1], scale: [30,30,30], rotation: [0, 0 , 0] },
     { modelName: 'text_new', position: [32, 20, 50], scale: [10, 10, 10], rotation: [0, -Math.PI , 0] },
     {modelName: 'groundFloorText', position: [-45, 30, -50], scale: [3, 3, 3], rotation: [0, 0 , 0] },
     {modelName: 'firstFloorText', position: [-45, 70, -50], scale: [3, 3, 3], rotation: [0, 0 , 0] },
@@ -107,7 +108,7 @@ models.forEach(model => loadModel(model.modelName, model.position, model.scale, 
 // Cube Geometry at the center of the ground floor with texture
 const support = () => {
     const cubeGeometry = new THREE.BoxGeometry(1, 1, 1); // Width, Height, Depth
-    const cubeTexture = new THREE.TextureLoader().load('./static/assets/img/newWall.jpg');
+    const cubeTexture = new THREE.TextureLoader().load('./static/assets/img/stairs.jpg');
     const cubeMaterial = new THREE.MeshStandardMaterial({ map: cubeTexture });
     const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
     cube.position.set(3, 0.5, -1);
@@ -116,46 +117,6 @@ const support = () => {
 }
 support();
 
-//Importance of the spotlight
-
-const spotLight = new THREE.SpotLight(0xffffff, 100,6,10,5,4); // Color, Intensity, Distance, Angle, Penumbra, Decay
-spotLight.position.set(-50, 22, 7.3);
-spotLight.target.position.set(42, 0, -1);
-spotLight.castShadow = true;
-spotLight.shadow.mapSize.width = 100;
-spotLight.shadow.mapSize.height = 100;
-spotLight.shadow.camera.near = 50;
-spotLight.shadow.camera.far = 40;
-spotLight.shadow.camera.fov = 10;
-scene.add(spotLight);
-
-const spotlightHelper = new THREE.SpotLightHelper(spotLight);
-scene.add(spotlightHelper);
-
-// dAT GUI for determing and locating spotlight
-const gui = new dat.GUI();
-const spotLightFolder = gui.addFolder('Spotlight');
-spotLightFolder.add(spotLight.position, 'x', -100, 100).name('X Position');
-spotLightFolder.add(spotLight.position, 'y', 0,100).name('Y Position');
-spotLightFolder.add(spotLight.position, 'z', -100, 100).name('Z Position');
-spotLightFolder.add(spotLight.target.position, 'x', -100, 100).name('X Target Position');
-spotLightFolder.add(spotLight.target.position, 'y', 0, 100).name('Y Target Position');
-spotLightFolder.add(spotLight.target.position, 'z', -100, 100).name('Z Target Position');
-spotLightFolder.add(spotLight, 'intensity', 0, 10).name('Intensity');
-spotLightFolder.add(spotLight, 'distance', 0, 100).name('Distance');
-spotLightFolder.add(spotLight.shadow.camera, 'near', 0.1, 100).name('Near');
-spotLightFolder.add(spotLight.shadow.camera, 'far', 0.1, 100).name('Far');
-spotLightFolder.add(spotLight.shadow.camera, 'fov', 1, 180).name('FOV');
-spotLightFolder.open();
-
-function spotAnimate() {
-    requestAnimationFrame(spotAnimate);
-    spotLight.position.set(spotLight.position.x, spotLight.position.y, spotLight.position.z);
-    spotLight.target.position.set(spotLight.target.position.x, spotLight.target.position.y, spotLight.target.position.z);
-    spotlightHelper.update();
-    renderer.render(scene, camera);
-}
-spotAnimate();
 
 // Event listener for Q key
 const Q_key = () => {
@@ -268,7 +229,7 @@ const loadCeilingLight = (position, scale, targetPosition) => {
         // Check if the current position matches the target position
         if (position[0] === targetPosition[0] && position[1] === targetPosition[1] && position[2] === targetPosition[2]) {
             // Create a spotlight at the ceiling light's position
-            const spotlight = new THREE.SpotLight(0xffffff, 5, 50, Math.PI / 10, 0.5, 2); // Color, Intensity, Distance, Angle, Penumbra, Decay
+            const spotlight = new THREE.SpotLight(0xffffff, 100, 50, Math.PI / 10, 5, 2); // Color, Intensity, Distance, Angle, Penumbra, Decay
             spotlight.position.set(position[0], position[1] - 1, position[2]); // Position it just below the light model
             spotlight.target.position.set(position[0], position[1] - 20, position[2]);
             spotlight.castShadow = true; // Enable shadows
@@ -634,13 +595,14 @@ const createStairs = () => {
         plane.position.set(...position);
         plane.rotation.set(...rotation);
         scene.add(plane);
-        
-
     };
     createStairPlane(25, 35, 2, './static/assets/img/stairs.jpg', [20, 8, -65], [-0.345 * Math.PI, 0, 0]); // Right stair
     createStairPlane(50, 25, 1, './static/assets/img/stairs.jpg',[ 8, 18, -92], [0.5 * Math.PI, 0, 0]); // Plane at the top
     createStairPlane(25, 40, 2, './static/assets/img/stairs.jpg', [-5, 30, -68  ], [0.32 * Math.PI, 0, 0]); // Left stair
-    createStairPlane(100, 39, 1, './static/assets/img/newWall.jpg', [-1, -1, -70], [0.5 * Math.PI, 0, 0]); // Plane at the bottom
+    createStairPlane(100,39, 1, './static/assets/img/stairs.jpg', [-1, -1, -70], [0.5 * Math.PI, 0, 0]); // Plane at the bottom
+    createStairPlane(25, 35, 2, './static/assets/img/stairs.jpg', [20, 8, -65], [-0.345 * Math.PI, 0, 0]); // FirstFloor Right stair
+    createStairPlane(50, 25, 1, './static/assets/img/stairs.jpg',[ 8, 18, -92], [0.5 * Math.PI, 0, 0]); // FirstFloor Plane at the top
+    createStairPlane(25, 40, 2, './static/assets/img/stairs.jpg', [-5, 30, -68  ], [0.32 * Math.PI, 0, 0]); // FirstFloor Left stair
   
   };
 createStairs();
@@ -665,11 +627,11 @@ function updateCameraPosition() {
 
     // Check if the camera is within the right stair boundaries
     if (x > rightStairBoundaries.lowerX && x < rightStairBoundaries.upperX && z > rightStairBoundaries.lowerZ && z < rightStairBoundaries.upperZ) {
-        if (z < -90) {
-            camera.position.y = 18 + ((z + 90) / 10) * 10; // Upward movement for right stairs
+        if (z < -110) {
+            camera.position.y = 18 + ((z + 110) / 10) * 8; // Upward movement for right stairs
         } else if (z > -60) {
             camera.position.y = 8 - ((z + 50) / 10) * 5; // Downward movement for right stairs
-        } else if (z > -90 && z < -60) {
+        } else if (z > -110 && z < -60) {
             camera.position.y = 28; // Stable height at the top of the right stairs
         } else {
             camera.position.y = 10; // Stable height at the bottom of the right stairs

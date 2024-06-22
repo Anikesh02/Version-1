@@ -59,7 +59,7 @@ function startAnimation() {
     const totalItems = timeline.children.length;
     
     const progressWidth =  (currentItem.clientWidth/timeline.offsetWidth)*100;
-    sumWidth = sumWidth+progressWidth
+    sumWidth = sumWidth+progressWidth;
     console.log("sum width",sumWidth);
     console.log(progressWidth)
     progressLine.style.width = `${sumWidth}%`;
@@ -127,29 +127,33 @@ const camera = new THREE.PerspectiveCamera(
 
 // var gui = new GUI();
 
-const directionalLight = new THREE.DirectionalLight(0x111111, 1);
-directionalLight.position.set(0, 0, 100).normalize(); // Example direction (adjust as needed)
+const directionalLight = new THREE.DirectionalLight(0x111111, 0);
+directionalLight.position.set(0, 0, 10).normalize(); 
 scene.add(directionalLight);
 
 const ambientLight = new THREE.AmbientLight(0xffffff); // Soft white light
 scene.add(ambientLight);
 
-let state_texture;
+
 const textureLoader = new THREE.TextureLoader();
 const backgroundImage = textureLoader.load('./static/assets/texture2.jpg');
-
+backgroundImage.wrapS = THREE.RepeatWrapping;
+backgroundImage.wrapT = THREE.RepeatWrapping;
+backgroundImage.repeat.set( 1, 1 );
 
 const geometry = new THREE.PlaneGeometry( 1, 1 );
-const material = new THREE.MeshStandardMaterial( {side: THREE.DoubleSide,map:backgroundImage} );
+const material = new THREE.MeshBasicMaterial( {side: THREE.BackSide,map:backgroundImage} );
 const plane = new THREE.Mesh( geometry, material );
 plane.rotation.x=Math.PI/2;
 plane.scale.set(10,10,10);
 scene.add( plane );
 
+let state_texture;
 // scene.background = backgroundImage;
-textureLoader.load("./static/assets/texture3.jpg", (texture) => {
-  state_texture = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
+textureLoader.load("./static/assets/texture5.jpg", (texture) => {
+  state_texture = new THREE.MeshBasicMaterial({
+   
+    // color: 0xffffff,
     // emissive: 0xffffff,
     map: texture,
     side:THREE.DoubleSide,
@@ -240,7 +244,7 @@ console.log("ICONS:", icon);
 // outlinePass.visibleEdgeColor.set(0x000000);
 // outlinePass.hiddenEdgeColor.set(0x000000);
 
- 
+const raycaster = new THREE.Raycaster();
 
 renderer.domElement.addEventListener("mousemove", (event) => {
   event.stopPropagation();
@@ -271,7 +275,7 @@ renderer.domElement.addEventListener("mousemove", (event) => {
         //   clearInterval(intervalId);
         //   intervalId = null;
         // }
-        child.material = new THREE.MeshStandardMaterial({
+        child.material = new THREE.MeshBasicMaterial({
           color: 0xE34547,
           // emissive: 0xff0000,
         });
@@ -289,6 +293,7 @@ renderer.domElement.addEventListener("mousemove", (event) => {
     }
   });
 });  
+
 // Vector3 {x: 0.028676969930529594, y: -0.26879048347473145, z: 0.0026505368296056986, isVector3: true}
 const onClick = {"harayana":[-0.22010113,0.05824,-0.59714],"gujarat":[0.028676,-0.268 +0.2,0.0026],"maharashtra":[-0.361,0.069,0.4438],"uttarPardesh":[0.068,0.193,-0.311]};
 renderer.domElement.addEventListener("click", (event) => {
@@ -296,7 +301,7 @@ renderer.domElement.addEventListener("click", (event) => {
     (event.clientX / window.innerWidth) * 2 - 1,
     -(event.clientY / window.innerHeight) * 2 + 1
   );
- 
+  
   raycaster.setFromCamera(mouse, camera);
   const stateMeshName = ["rajasthanFrame","LineArt","gujaratFrame","maharashtraFrame","karnatakaFrame"];
   children.forEach((child) => {
