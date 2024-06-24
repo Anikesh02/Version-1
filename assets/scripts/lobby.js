@@ -128,17 +128,21 @@ const Q_key = () => {
     const floorSelectionModal = document.getElementById("floorSelectionModal");
     const floorSelectionClose = document.getElementById("floorSelectionClose");
 
+    // Open the floor selection modal
     function openFloorSelectionModal() {
         floorSelectionModal.classList.add('show');
     }
+    // Close the floor selection modal
     floorSelectionClose.onclick = function () {
         floorSelectionModal.classList.remove('show');
     }
+    // Close the floor selection modal when the user clicks outside of it
     window.onclick = function (event) {
         if (event.target == floorSelectionModal) {
             floorSelectionModal.classList.remove('show');
         }
     }
+    
     window.setCameraHeight = function (height) {
         camera.position.y = height;
         floorSelectionModal.classList.remove('show');
@@ -156,8 +160,8 @@ const createWall = (width, height, color, position, addLightStrips = false, rota
     scene.add(wall);
 
     if (addLightStrips) {
-        const lightStripMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff }); // Change the color to your liking
-        const lightStripGeometry = new THREE.BoxGeometry(0.5, height, 0.2); // Adjust the '0.2' to change the thickness of the light strip
+        const lightStripMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        const lightStripGeometry = new THREE.BoxGeometry(0.5, height, 0.2);
 
         // Left light strip
         const leftLightStrip = new THREE.Mesh(lightStripGeometry, lightStripMaterial);
@@ -195,7 +199,6 @@ const createFloorWalls = (floorHeight) => {
 createFloorWalls(0); // Ground Floor
 createFloorWalls(42);  // First Floor
 
-// Light strip at the center of the ground floor
 const lightStrip = (xPos, yPos, zPos) => {
     const lightStripMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const lightStripGeometry = new THREE.BoxGeometry(0.5, 1000, 0.2); // Width, Height, Depth
@@ -204,7 +207,7 @@ const lightStrip = (xPos, yPos, zPos) => {
     scene.add(lightStrip);
 }
 lightStrip(-12.5, 6, -89.5);
-lightStrip(32, 6, -89.5);
+lightStrip(31, 6, -89.5);
 
 
 // Front Wall
@@ -212,7 +215,7 @@ const createFrontWall = () => {
     const geometry = new THREE.PlaneGeometry(100, 1000);
     const material = new THREE.MeshStandardMaterial({ color: 0x2f2e2e, side: THREE.DoubleSide });
     const wall = new THREE.Mesh(geometry, material);
-    wall.position.set(0, 45, -102);
+    wall.position.set(0, 45, -115);
     scene.add(wall);
 };
 createFrontWall();
@@ -231,20 +234,11 @@ const loadCeilingLight = (position, scale, targetPosition) => {
             // Create a spotlight at the ceiling light's position
             const spotlight = new THREE.SpotLight(0xffffff, 100, 50, Math.PI / 10, 5, 2); // Color, Intensity, Distance, Angle, Penumbra, Decay
             spotlight.position.set(position[0], position[1] - 1, position[2]); // Position it just below the light model
-            spotlight.target.position.set(position[0], position[1] - 20, position[2]);
-            spotlight.castShadow = true; // Enable shadows
-
-            // Set up shadow properties
-            spotlight.shadow.mapSize.width = 1024;
-            spotlight.shadow.mapSize.height = 1024;
-            spotlight.shadow.camera.near = 0.5;
-            spotlight.shadow.camera.far = 50;
+            spotlight.target.position.set(position[0], position[1] - 10, position[2]);
 
             // Spotlight helper
             const spotlightHelper = new THREE.SpotLightHelper(spotlight);
             scene.add(spotlightHelper);
-
-
             scene.add(spotlight);
             scene.add(spotlight.target);
         }
@@ -283,16 +277,11 @@ ceilingLights.forEach(light => loadCeilingLight(light.position, light.scale, tar
 
 
 
-const createVideoPlaneWithBorder = (videoUrl, position, rotation, width, height, borderPositionOffset, hasBorder, modalLink, modalInfo) => {
-    const video = document.createElement('video');
-    video.src = videoUrl;
-    video.loop = true;
-    video.muted = true;
-    video.play();
-
-    const texture = new THREE.VideoTexture(video);
+const createImagePlaneWithBorder = (imageUrl, position, rotation, width, height, borderPositionOffset, hasBorder, modalLink, modalInfo, reportUrl, youtubeUrl, name) => {
+    const textureLoader = new THREE.TextureLoader();
+    const imageTexture = textureLoader.load(imageUrl);
     const geometry = new THREE.PlaneGeometry(width, height);
-    const material = new THREE.MeshStandardMaterial({ map: texture, side: THREE.DoubleSide });
+    const material = new THREE.MeshStandardMaterial({ map: imageTexture, side: THREE.DoubleSide });
     const plane = new THREE.Mesh(geometry, material);
     plane.position.set(position.x, position.y, position.z);
     plane.rotation.set(rotation.x, rotation.y, rotation.z);
@@ -306,28 +295,32 @@ const createVideoPlaneWithBorder = (videoUrl, position, rotation, width, height,
         border.rotation.set(rotation.x, rotation.y, rotation.z);
         scene.add(border);
     }
-
-    plane.userData = { videoUrl, modalLink, modalInfo, position, rotation };
+    
+    plane.userData = { imageUrl, modalLink, modalInfo, reportUrl, youtubeUrl, name, position, rotation };
     return plane;
 };
+
 const modal = document.getElementById('modal');
 const modalImage = document.getElementById('modal-image');
-const modalVideo = document.getElementById('modal-video');
+const modalTitle = document.getElementById('modal-title');
 const modalClose = document.getElementById('modal-close');
 const modalBack = document.getElementById('modal-back');
 const modalLink = document.getElementById('modal-link');
 const modalInfo = document.getElementById('modal-info');
+const modalDescription = document.getElementById('modal-description');
+const downloadPaperButton = document.getElementById('download-paper');
+const youtubePlayer = document.getElementById('youtube-player');
 
 // Close modal
-modalClose.onclick = () => {
+modalClose.onclick = function () {
     modal.classList.remove('show');
-    modal.style.pointerEvents = 'none';
+    console.log("modal closed");
 };
 
+
 // Set up the back button action
-modalBack.onclick = () => {
+modalBack.onclick = function()  {
     modal.classList.remove('show');
-    modal.style.pointerEvents = 'none';
 };
 
 // Modal link will be updated dynamically based on the plane
@@ -343,7 +336,6 @@ document.addEventListener('keydown', (event) => {
         showSelectionModal();
     }
 });
-
 const showSelectionModal = () => {
     const selectionModal = document.createElement('div');
     selectionModal.id = 'selectionModal';
@@ -377,41 +369,37 @@ const showSelectionModal = () => {
     selectionModal.appendChild(selectionModalClose);
 
     planes.forEach((plane, index) => {
-        const videoElement = document.createElement('video');
-        videoElement.src = plane.userData.videoUrl;
-        videoElement.loop = true;
-        videoElement.muted = true;
-        videoElement.play();
-        videoElement.style.width = '100px';
-        videoElement.style.height = '100px';
-        videoElement.style.margin = '10px';
-        videoElement.style.cursor = 'pointer';
-        videoElement.style.borderRadius = '10px';
-        videoElement.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
-        videoElement.onclick = () => {
-            navigateToPlane(index);
+        const imageElement = document.createElement('img');
+        imageElement.src = plane.userData.imageUrl;
+        imageElement.style.width = '100px';
+        imageElement.style.height = '100px';
+        imageElement.style.margin = '10px';
+        imageElement.style.cursor = 'pointer';
+        imageElement.style.borderRadius = '10px';
+        imageElement.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+        imageElement.onclick = () => {
+            navigateToImage(index);
             document.body.removeChild(selectionModal);
         };
 
         const nameElement = document.createElement('div');
-        nameElement.innerText = plane.userData.modalInfo.title; // Assuming modalInfo has a title property
+        nameElement.innerText = plane.userData.name;
         nameElement.style.textAlign = 'center';
         nameElement.style.marginTop = '5px';
         nameElement.style.fontWeight = 'bold';
 
-        const videoContainer = document.createElement('div');
-        videoContainer.style.display = 'inline-block';
-        videoContainer.style.textAlign = 'center';
-        videoContainer.appendChild(videoElement);
-        videoContainer.appendChild(nameElement);
+        const imageContainer = document.createElement('div');
+        imageContainer.style.display = 'inline-block';
+        imageContainer.style.textAlign = 'center';
+        imageContainer.appendChild(imageElement);
+        imageContainer.appendChild(nameElement);
 
-        selectionModal.appendChild(videoContainer);
+        selectionModal.appendChild(imageContainer);
     });
 
     document.body.appendChild(selectionModal);
 };
-
-const navigateToPlane = (index) => {
+const navigateToImage = (index) => {
     const targetPlane = planes[index];
     const offset = -9;
     const position = targetPlane.userData.position;
@@ -426,7 +414,6 @@ const navigateToPlane = (index) => {
     camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
     camera.lookAt(position.x, position.y, position.z);
 };
-
 const checkCameraPosition = () => {
     const cameraPosition = new THREE.Vector3();
     camera.getWorldPosition(cameraPosition);
@@ -442,17 +429,14 @@ const checkCameraPosition = () => {
 
         if (distance < 8.5 && facing) {
             modalVisible = true;
-            if (plane.userData.videoUrl) {
-                modalVideo.src = plane.userData.videoUrl;
-                modalVideo.style.display = 'block';
-                modalImage.style.display = 'none';
-            } else if (plane.userData.imageUrl) {
-                modalImage.src = plane.userData.imageUrl;
-                modalImage.style.display = 'block';
-                modalVideo.style.display = 'none';
-            }
+            modalImage.src = plane.userData.imageUrl; // Load the image into the modal
             modalLink.href = plane.userData.modalLink; // Set the modal link
-            modalInfo.innerHTML = plane.userData.modalInfo.description; // Assuming modalInfo has a description property
+            modalTitle.innerText = plane.userData.name; // Set the modal title
+            modalDescription.innerText = plane.userData.modalInfo; // Set the modal info
+            downloadPaperButton.onclick = () => {
+                window.location.href = plane.userData.reportUrl; // Set the download link
+            };
+            youtubePlayer.src = plane.userData.youtubeUrl; // Set the YouTube video
         }
     });
 
@@ -464,6 +448,7 @@ const checkCameraPosition = () => {
         modal.style.pointerEvents = 'none'; // Disable pointer events when modal is closed
     }
 };
+
 const loadStand = (position, scale, rotation) => {
     const loader = new GLTFLoader().setPath('./static/assets/models/');
 
@@ -518,35 +503,36 @@ const isCameraFacingPlane = (camera, plane) => {
 
 const planes = [];
 //Ground Floor
-planes.push(createVideoPlaneWithBorder('./static/assets/video/chanda.mp4', { x: 25, y: 6.6, z: 12 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info1', 'Info for image 1'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/bhairava.mp4', { x: -18, y: 6.6, z: 12 }, { x: -90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info2', 'Info for image 2'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/aayanar a.mp4', { x: 25, y: 6.6, z: -5 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info3', 'Info for image 3'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/aayanar b.mp4', { x: -18, y: 6.6, z: -5 }, { x: -90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info4', 'Info for image 4'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/ardhanareshwara.mp4', { x: -18, y: 6.6, z: 30 }, { x: - 90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info5', 'Info for image 5'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/bommai.mp4', { x: 25, y: 6.6, z: 30 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info6', 'Info for image 6'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/boots.mp4', { x: 49, y: 12, z: 8 }, { x: 0, y: -0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info7', 'Info for image 7'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/buddha.mp4', { x: 49, y: 12, z: -20 }, { x: 0, y: -0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info8', 'Info for image 8'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/chanda.mp4', { x: -49, y: 12, z: -20 }, { x: 0, y: 0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info9', 'Info for image 9'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/chariot.mp4', { x: -48, y: 12, z: 8 }, { x: 0, y: 0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info10', 'Info for image 10'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/ganesh.mp4', { x: 49, y: 12, z: 30 }, { x: 0, y: -0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info11', 'Info for image 11'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/krishna.mp4', { x: -49, y: 12, z: 30 }, { x: 0, y: 0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info12', 'Info for image 12'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/kubera.mp4', { x: 25, y: 6.6, z: -20 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info13', 'Info for image 13'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/lotus medallion.mp4', { x: -18, y: 6.6, z: -20 }, { x: -90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info14', 'Info for image 14'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image.jpg', { x: 25, y: 6.6, z: 12 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info1', 'A paragraph is defined as “a group of sentences or a single sentence that forms a unit” (Lunsford and Connors 116). Length and appearance do not determine whether a section in a paper is a paragraph. For instance, in some styles of writing, particularly journalistic styles, a paragraph can be just one sentence long.', 'https://example.com/report1.pdf', 'https://www.youtube.com/embed/AfrVvmKV50Q?si=0MCsYGSmAYkXZzTP', 'Artifact Name'));
+
+planes.push(createImagePlaneWithBorder('./static/assets/img/image2.jpg', { x: -18, y: 6.6, z: 12 }, { x: -90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info2', 'Info for image 2'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image3.jpg', { x: 25, y: 6.6, z: -5 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info3', 'Info for image 3'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image4.jpg', { x: -18, y: 6.6, z: -5 }, { x: -90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info4', 'Info for image 4'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image5.jpg', { x: -18, y: 6.6, z: 30 }, { x: - 90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info5', 'Info for image 5'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image6.jpg', { x: 25, y: 6.6, z: 30 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info6', 'Info for image 6'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image7.jpg', { x: 49, y: 12, z: 8 }, { x: 0, y: -0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info7', 'Info for image 7'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image8.jpg', { x: 49, y: 12, z: -20 }, { x: 0, y: -0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info8', 'Info for image 8'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image9.jpg', { x: -49, y: 12, z: -20 }, { x: 0, y: 0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info9', 'Info for image 9'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image10.jpg', { x: -48, y: 12, z: 8 }, { x: 0, y: 0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info10', 'Info for image 10'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image11.jpg', { x: 49, y: 12, z: 30 }, { x: 0, y: -0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info11', 'Info for image 11'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image12.jpg', { x: -49, y: 12, z: 30 }, { x: 0, y: 0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info12', 'Info for image 12'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image13.jpg', { x: 25, y: 6.6, z: -20 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info13', 'Info for image 13'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image14.jpg', { x: -18, y: 6.6, z: -20 }, { x: -90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info14', 'Info for image 14'));
 // First Floor
-planes.push(createVideoPlaneWithBorder('./static/assets/video/mask.mp4', { x: 25, y: 48.6, z: 12 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info15', 'Info for image 15'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/mutoscope.mp4', { x: -18, y: 48.6, z: 12 }, { x: -90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info16', 'Info for image 16'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/palang.mp4', { x: 25, y: 48.6, z: -5 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info17', 'Info for image 17'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/prabhavali.mp4', { x: -18, y: 48.6, z: -5 }, { x: -90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info18', 'Info for image 18'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/rebecca.mp4', { x: -18, y: 48.6, z: 30 }, { x: - 90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info19', 'Info for image 19'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/smarak.mp4', { x: 25, y: 48.6, z: 30 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info20', 'Info for image 20'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/sword.mp4', { x: 49, y: 54, z: 8 }, { x: 0, y: -0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info21', 'Info for image 21'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/urn.mp4', { x: 49, y: 54, z: -20 }, { x: 0, y: -0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info22', 'Info for image 22'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/vajra.mp4', { x: -49, y: 54, z: -20 }, { x: 0, y: 0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info23', 'Info for image 23'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/vishnu.mp4', { x: -48, y: 54, z: 8 }, { x: 0, y: 0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info24', 'Info for image 24'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/yogini.mp4', { x: 49, y: 54, z: 30 }, { x: 0, y: -0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info25', 'Info for image 25'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/boots.mp4', { x: -49, y: 54, z: 30 }, { x: 0, y: 0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info26', 'Info for image 26'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/chanda.mp4', { x: 25, y: 48.6, z: -20 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info27', 'Info for image 27'));
-planes.push(createVideoPlaneWithBorder('./static/assets/video/bommai.mp4', { x: -18, y: 48.6, z: -20 }, { x: -90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info28', 'Info for image 28'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image15.jpg', { x: 25, y: 48.6, z: 12 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info15', 'Info for image 15'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image16.jpg', { x: -18, y: 48.6, z: 12 }, { x: -90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info16', 'Info for image 16'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image17.jpg', { x: 25, y: 48.6, z: -5 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info17', 'Info for image 17'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image18.jpg', { x: -18, y: 48.6, z: -5 }, { x: -90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info18', 'Info for image 18'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image19.jpg', { x: -18, y: 48.6, z: 30 }, { x: - 90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info19', 'Info for image 19'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image20.jpg', { x: 25, y: 48.6, z: 30 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info20', 'Info for image 20'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image21.jpg', { x: 49, y: 54, z: 8 }, { x: 0, y: -0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info21', 'Info for image 21'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image22.jpg', { x: 49, y: 54, z: -20 }, { x: 0, y: -0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info22', 'Info for image 22'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image23.jpg', { x: -49, y: 54, z: -20 }, { x: 0, y: 0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info23', 'Info for image 23'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image24.jpg', { x: -48, y: 54, z: 8 }, { x: 0, y: 0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info24', 'Info for image 24'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image25.jpg', { x: 49, y: 54, z: 30 }, { x: 0, y: -0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info25', 'Info for image 25'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image26.jpg', { x: -49, y: 54, z: 30 }, { x: 0, y: 0.5 * Math.PI, z: 0 }, 15, 15, { x: 0, y: 2, z: -0.01 }, false, 'https://example.com/more-info26', 'Info for image 26'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image27.jpg', { x: 25, y: 48.6, z: -20 }, { x: -90 * (Math.PI / 180), y: -60 * (Math.PI / 180), z: -Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.08, z: -0.01 }, true, 'https://example.com/more-info27', 'Info for image 27'));
+planes.push(createImagePlaneWithBorder('./static/assets/img/image28.jpg', { x: -18, y: 48.6, z: -20 }, { x: -90 * (Math.PI / 180), y: 60 * (Math.PI / 180), z: Math.PI / 2 }, 6, 6, { x: 0.05, y: -0.1, z: -0.01 }, true, 'https://example.com/more-info28', 'Info for image 28'));
 
 const animate = () => {
     requestAnimationFrame(animate);
@@ -554,6 +540,31 @@ const animate = () => {
     renderer.render(scene, camera);
 };
 animate();
+
+
+// Array manipulation
+// Function to update planes with new data
+const updatePlanes = (data) => {
+    planes.forEach((plane, index) => {
+        if (index < data.length) {
+            const item = data[index];
+            plane.userData.imageUrl = item.imageUrl;
+            plane.userData.modalLink = item.modalLink;
+            plane.userData.modalInfo = item.modalInfo;
+            plane.userData.reportUrl = item.reportUrl;
+            plane.userData.youtubeUrl = item.youtubeUrl;
+            plane.userData.name = item.name;
+        }
+    });
+};
+
+fetch('/get-image-data/')
+    .then(response => response.json())
+    .then(data => {
+        updatePlanes(data);
+    })
+    .catch(error => console.error('Error fetching image data:', error));
+
 
 
 // Controls
@@ -617,9 +628,9 @@ const createStairs = () => {
         plane.rotation.set(...rotation);
         scene.add(plane);
     };
-    createStairPlane(25, 35, 2, './static/assets/img/stairs.jpg', [20, 8, -65], [-0.345 * Math.PI, 0, 0]); // Ground Floor Right stair
+    createStairPlane(25, 35, 2, './static/assets/img/stairs.jpg', [20, 8, -65], [-0.345 * Math.PI, 0, 0]); // Right stair
     createStairPlane(50, 25, 1, './static/assets/img/stairs.jpg',[ 8, 18, -92], [0.5 * Math.PI, 0, 0]); // Plane at the top
-    createStairPlane(25, 40, 2, './static/assets/img/stairs.jpg', [-5, 30, -68  ], [0.32 * Math.PI, 0, 0]); // Ground FloorLeft stair
+    createStairPlane(25, 40, 2, './static/assets/img/stairs.jpg', [-5, 30, -68  ], [0.32 * Math.PI, 0, 0]); // Left stair
     createStairPlane(100,39, 1, './static/assets/img/stairs.jpg', [-1, -1, -70], [0.5 * Math.PI, 0, 0]); // Plane at the bottom
     createStairPlane(25, 35, 2, './static/assets/img/stairs.jpg', [20, 8, -65], [-0.345 * Math.PI, 0, 0]); // FirstFloor Right stair
     createStairPlane(50, 25, 1, './static/assets/img/stairs.jpg',[ 8, 18, -92], [0.5 * Math.PI, 0, 0]); // FirstFloor Plane at the top
@@ -629,31 +640,30 @@ const createStairs = () => {
 createStairs();
 
 
-//Stairs Logic
+// Stairs Logic
 function updateCameraPosition() {
     const { x, z } = controls.getObject().position;
-
-    // Define the stair boundaries for both right and left stairs
     const rightStairBoundaries = {
-        lowerX: -15,
+        lowerX: -20,
         upperX: 30,
         lowerZ: -70,
         upperZ: -50
     };
+
     const leftStairBoundaries = {
         lowerX: -30,
         upperX: 10,
-        lowerZ: -70,
+        lowerZ: -90,
         upperZ: -50
     };
 
     // Check if the camera is within the right stair boundaries
     if (x > rightStairBoundaries.lowerX && x < rightStairBoundaries.upperX && z > rightStairBoundaries.lowerZ && z < rightStairBoundaries.upperZ) {
         if (z < -110) {
-            camera.position.y = 3 + ((z + 70) / 10) * 5; // Upward movement for right stairs
+            camera.position.y = 18 + ((z + 110) / 10) * 8; // Upward movement for right stairs
         } else if (z > -60) {
-            camera.position.y = 3 - ((z + 50) / 10) * 5; // Downward movement for right stairs
-        } else if (z > 110 && z < -60) {
+            camera.position.y = 8 - ((z + 50) / 10) * 5; // Downward movement for right stairs
+        } else if (z > -110 && z < -60) {
             camera.position.y = 28; // Stable height at the top of the right stairs
         } else {
             camera.position.y = 10; // Stable height at the bottom of the right stairs
@@ -663,12 +673,15 @@ function updateCameraPosition() {
     // Check if the camera is within the left stair boundaries
     if (x > leftStairBoundaries.lowerX && x < leftStairBoundaries.upperX && z > leftStairBoundaries.lowerZ && z < leftStairBoundaries.upperZ) {
         if (z < -70) {
-            camera.position.y = 10 + ((z + 70) / 10) * 10; // Upward movement for left stairs
+            camera.position.y = 28 + ((z + 70) / 10) * 10; // Upward movement for left stairs
         } else if (z > -60) {
             camera.position.y = 30 + ((z + 50) / 10) * 10; // Downward movement for left stairs
         } else if (z > -70 && z < -60) {
-            camera.position.y = 25; // Stable height at the top of the left stairs
-        } 
+            camera.position.y = 42; // Stable height at the top of the left stairs
+        } else{
+            camera.position.y = 30; // Stable height at the bottom of the left stairs
+        
+        }
     }
 }
 // Adjust the aspect ratio when the window is resized

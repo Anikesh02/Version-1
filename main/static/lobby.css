@@ -78,53 +78,98 @@ body {
 #modal {
   display: none;
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80%;
-  max-width: 600px;
-  padding: 20px;
-  background-color: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   z-index: 1000;
-  pointer-events: none; /* Disable pointer events initially */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(5px);
 }
+
 #modal.show {
-  display: block;
-  pointer-events: auto; /* Enable pointer events when modal is shown */
-}
-#modal.hide {
-  display: none;
-  pointer-events: auto; /* Enable pointer events when modal is shown */
-}
-#modal-close {
-  cursor: pointer;
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  display: flex;
+  pointer-events: auto;
 }
 
 #modal-content {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  background-color: rgba(255, 255, 255, 0.2); /* Adjust transparency as needed */
+  border-radius: 10px;
+  padding: 20px;
+  width: 80%;
+  max-width: 800px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
-#modal-content img {
-  max-width: 40%;
+
+#modal-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-right: 20px;
 }
+
+#modal-left img {
+  width: 100%;
+  max-width: 200px; /* Adjust image max-width */
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+#modal-right {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
 #modal-info {
-  max-width: 55%;
+  margin-bottom: 20px;
 }
+
+#modal-video {
+  position: relative;
+  padding-top: 56.25%; /* Aspect ratio for responsive iframe */
+}
+
+#youtube-player {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+}
+
 #modal-buttons {
+  text-align: center;
   margin-top: 20px;
-  text-align: right;
-}
-#modal-buttons button {
-  margin-left: 10px;
 }
 
-
+button {
+  margin: 0 10px;
+  padding: 10px 20px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+ button:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
 
 /* Floor Modal container */
 #floorSelectionModal {
@@ -207,3 +252,19 @@ body {
   color: #2323be;
 }
 
+/* Before: Using -ms-high-contrast */
+@media screen and (-ms-high-contrast: active) {
+  #floorSelectionClose {
+    color: HighlightText; /* System color in high contrast mode */
+  }
+}
+
+/* After: Using forced-colors */
+@media (forced-colors: active) {
+  #floorSelectionClose {
+    color: ButtonText; /* Use system color for text in buttons */
+  }
+  #floorSelectionContent, #floorSelectionInfo, #floorSelectionInfo h2 {
+    forced-color-adjust: none; /* Opt-out of forced colors for specific elements if needed */
+  }
+}

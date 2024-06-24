@@ -22,19 +22,22 @@
     </div>
       
 
-    <div id="modal">
+    <div id="modal" class="glassmorphism">
         <span id="modal-close">&times;</span>
         <div id="modal-content">
-            <!-- Video Element -->
-            <video id="modal-video" controls style="display: none;">
-                Your browser does not support the video tag.
-            </video>
-            <!-- Image Element -->
-            <img id="modal-image" src="" alt="Image" style="display: none;">
-            <!-- Modal Information -->
-            <div id="modal-info">
-                <h2>Content Information</h2>
-                <p>This is some information about the content.</p>
+            <div id="modal-left">
+                <img id="modal-image" src="" alt="Image">
+                <h2 id="modal-title">Image Name</h2>
+                <button id="download-paper">Download Research Paper</button>
+            </div>
+            <div id="modal-right">
+                <div id="modal-info">
+                    <h2>Image Information</h2>
+                    <p id="modal-description">This is some information about the image.</p>
+                </div>
+                <div id="modal-video">
+                    <iframe id="youtube-player" width="50%" height="200" src="" frameborder="1" allow="accelerometer; autoplay; muted; gyroscope;  picture-in-picture" allowfullscreen></iframe>
+                </div>
             </div>
         </div>
         <div id="modal-buttons">
@@ -42,6 +45,8 @@
             <button id="modal-link">3D Model</button>
         </div>
     </div>
+    
+    
   
 
   <!-- Floor Selection Modal -->
